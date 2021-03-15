@@ -10,7 +10,7 @@
   --color-danger: #e6195f;
 
   --color-link: var(--color-lightpurple);
-  --color-link-hover: var(--color-lessSaturatedBlue);
+  --color-link-hover: var(--color-purple);
 
   --border-dark: 1px solid var(--color-lighterBlack);
   --border-purple: 1px solid var(--color-lightpurple);
