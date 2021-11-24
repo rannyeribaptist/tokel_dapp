@@ -77,7 +77,7 @@ const TriCell = ({ icon, primary, secondary, justify }: TriCellProps) => (
 );
 
 const handleTxDetailView = (tx: TxType) => {
-  dispatch.account.SET_CHOSEN_TX(tx);
+  dispatch.wallet.SET_CHOSEN_TX(tx);
   dispatch.environment.SET_MODAL_NAME(ModalName.TX_DETAIL);
 };
 

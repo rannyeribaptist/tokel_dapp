@@ -8,8 +8,7 @@ import { dispatch } from 'store/rematch';
 import { selectAccountAddress } from 'store/selectors';
 import { BitgoAction, checkData, sendToBitgo } from 'util/bitgoHelper';
 import { getUnixTimestamp } from 'util/helpers';
-import { parseUnspent } from 'util/transactions';
-import { spendSuccess } from 'util/transactionsHelper';
+import { parseUnspent, spendSuccess } from 'util/transactions';
 import { BITGO_IPC_ID, IS_DEV, NspvJSErrorMessages } from 'vars/defines';
 
 const BAD_WALLET_ERRORS = ['Error: RangeError: value out of range'];
@@ -52,8 +51,8 @@ const BitgoOrchestrator = () => {
       // NEW ADDRESS
       if (payload.type === BitgoAction.NEW_ADDRESS) {
         const { wif, seed } = payload.data;
-        dispatch.account.SET_KEY(wif);
-        dispatch.account.SET_SEED(seed);
+        dispatch.wallet.SET_KEY(wif);
+        dispatch.wallet.SET_SEED(seed);
         return;
       }
       // SPEND
@@ -65,7 +64,7 @@ const BitgoOrchestrator = () => {
         const success = spendSuccess(payload.data);
         dispatch.currentTransaction.SET_TX_STATUS(success);
         if (success) {
-          dispatch.account.ADD_NEW_TX({
+          dispatch.wallet.ADD_NEW_TX({
             txid: payload.data.txid,
             recipient: payload.data.address,
             from: [myAddress],
@@ -102,7 +101,7 @@ const BitgoOrchestrator = () => {
           log.error(payload.error);
           return;
         }
-        dispatch.account.login({ data: payload.data });
+        dispatch.wallet.login({ data: payload.data });
         dispatch.environment.SET_LOGIN_FEEDBACK('Getting transactions...');
         const { address } = payload.data;
         sendToBitgo(BitgoAction.LIST_UNSPENT, { address });
@@ -127,17 +126,17 @@ const BitgoOrchestrator = () => {
         dispatch.wallet.SET_ASSETS(parseUnspent(payload.data.balance));
         dispatch.wallet.SET_TOKEN_BALANCES(payload.data.tokens);
         dispatch.environment.getTokenDetail(payload.data.tokens);
-        dispatch.account.SET_UNSPENT(payload.data);
+        dispatch.wallet.SET_UNSPENT(payload.data);
         return;
       }
       // LISTTRANSACTIONS
       if (payload.type === BitgoAction.LIST_TRANSACTIONS) {
-        dispatch.account.SET_TXS(payload.data);
+        dispatch.wallet.SET_TXS(payload.data);
         return;
       }
       // TOKEN V2 ADDRESS
       if (payload.type === BitgoAction.TOKEN_V2_ADDRESS) {
-        dispatch.account.SET_CC_DETAILS(payload.data);
+        dispatch.wallet.SET_CC_DETAILS(payload.data);
       }
       // TOKEN_V2_INFO_TOKEL
       if (payload.type === BitgoAction.TOKEN_V2_INFO_TOKEL) {

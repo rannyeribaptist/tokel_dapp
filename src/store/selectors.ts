@@ -14,13 +14,13 @@ export const selectShowNetworkPrefs = (state: RootState) => state.environment.ne
 
 export const selectTokelPriceUSD = (state: RootState) => state.environment.tokelPriceUSD;
 
-export const selectAccountAddress = (state: RootState) => state.account.address;
-export const selectAccountPubKey = (state: RootState) => state.account.pubkey;
-export const selectUnspentBalance = (state: RootState) => state.account.unspent?.balance;
-export const selectUnspent = (state: RootState) => state.account.unspent ?? {};
-export const selectChosenTransaction = (state: RootState) => state.account.chosenTx;
+export const selectAccountAddress = (state: RootState) => state.wallet.address;
+export const selectAccountPubKey = (state: RootState) => state.wallet.pubkey;
+export const selectUnspentBalance = (state: RootState) => state.wallet.unspent?.balance;
+export const selectUnspent = (state: RootState) => state.wallet.unspent ?? {};
+export const selectChosenTransaction = (state: RootState) => state.wallet.chosenTx;
 export const selectTransactions = (state: RootState) =>
-  state.account.txs[state.account.address] ?? [];
+  state.wallet.txs[state.wallet.address] ?? [];
 
 export const selectTokenDetails = (state: RootState) => state.environment.tokenDetails;
 
@@ -31,7 +31,7 @@ export const selectEnvError = (state: RootState) => state.environment.error ?? n
 export const selectAssets = (state: RootState) => state.wallet.assets;
 
 export const selectChosenToken = (state: RootState) => state.wallet.chosenToken;
-export const selectTokenBalances = (state: RootState) => state.account.unspent?.tokens ?? [];
+export const selectTokenBalances = (state: RootState) => state.wallet.unspent?.tokens ?? [];
 export const selectActiveTokenIds = (state: RootState) => Object.keys(state.wallet.tokenBalances);
 
 export const selectTokenFilterId = (state: RootState) => state.wallet.tokenFilterId;
@@ -43,8 +43,8 @@ export const selectCurrentTxStatus = (state: RootState) => state.currentTransact
 export const selectCurrentTxError = (state: RootState) => state.currentTransaction.error;
 export const selectCurrenTxTokenTx = (state: RootState) => state.currentTransaction.tokenTx;
 
-export const selectKey = (state: RootState) => state.account.key;
-export const selectSeed = (state: RootState) => state.account.seed;
+export const selectKey = (state: RootState) => state.wallet.key;
+export const selectSeed = (state: RootState) => state.wallet.seed;
 
 // derived
 export const selectTokenCount = (state: RootState) => size(state.wallet.tokenBalances);

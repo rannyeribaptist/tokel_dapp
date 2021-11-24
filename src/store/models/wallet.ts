@@ -1,6 +1,8 @@
 import { createModel } from '@rematch/core';
 import dp from 'dot-prop-immutable';
 
+import { TxType, UnspentType } from 'util/nspvlib-mock';
+import { getStillUnconfirmed, parseBlockchainTransaction, parseSpendTx } from 'util/transactions';
 import { TICKER, TokenFilter } from 'vars/defines';
 
 import type { RootModel } from './models';
@@ -12,6 +14,17 @@ export type Asset = {
   usd_value?: number;
 };
 
+interface LoginArgs {
+  data: {
+    wif: string;
+    address: string;
+    seed: string;
+    pubkey: string;
+  };
+  setError: (message: string) => void;
+  setFeedback: (message: string) => void;
+}
+
 export type TFI = typeof TokenFilter[keyof typeof TokenFilter];
 export type WalletState = {
   chosenAsset?: string;
@@ -20,6 +33,15 @@ export type WalletState = {
   tokenBalances: Record<string, number>;
   tokenFilterId: TFI;
   tokenSearchTerm: string;
+  address?: string;
+  unspent?: UnspentType;
+  txs: {
+    [address: string]: Array<TxType>;
+  };
+  key: string;
+  seed: string;
+  pubkey: string;
+  chosenTx: TxType;
 };
 
 export default createModel<RootModel>()({
@@ -30,8 +52,54 @@ export default createModel<RootModel>()({
     tokenBalances: {},
     tokenFilterId: TokenFilter.ALL,
     tokenSearchTerm: '',
+    address: null,
+    unspent: null,
+    txs: {},
+    key: null,
+    pubkey: null,
   } as WalletState,
   reducers: {
+    SET_ADDRESS: (state, address: string) => ({
+      ...state,
+      address,
+    }),
+    SET_TXS: (state, txs: Array<TxType>) => {
+      if (!state.address) {
+        return state;
+      }
+      const unconfirmed = getStillUnconfirmed(txs, state.txs[state.address]);
+      const newTxs = txs.map(tx => parseBlockchainTransaction(tx, state.address));
+      return dp.set(state, `txs.${state.address}`, unconfirmed.concat(newTxs));
+    },
+    ADD_NEW_TX: (state, transaction: TxType) =>
+      dp.set(state, `txs.${state.address}`, list => [
+        parseSpendTx(transaction, state.address),
+        ...list,
+      ]),
+    SET_UNSPENT: (state, unspent: UnspentType) => ({
+      ...state,
+      unspent,
+    }),
+    SET_CHOSEN_TX: (state, chosenTx: TxType) => ({
+      ...state,
+      chosenTx,
+    }),
+    SET_KEY: (state, key: string) => ({
+      ...state,
+      key,
+    }),
+    SET_SEED: (state, seed: string) => ({
+      ...state,
+      seed,
+    }),
+    SET_PUBKEY: (state, pubkey: string) => ({
+      ...state,
+      pubkey,
+    }),
+    SET_CC_DETAILS: (state, ccdetails: string) => ({
+      ...state,
+      ccdetails,
+    }),
     // SET_CHOSEN_ASSET: (state, chosenAsset: string) => ({ ...state, chosenAsset }),
     SET_ASSETS: (state, assets: Array<Asset>) => ({ ...state, assets }),
     UPDATE_ASSET_BALANCE: (state, asset: Asset) => {
@@ -48,4 +116,14 @@ export default createModel<RootModel>()({
     UPDATE_TOKEN_BALANCE: (state, tokenid: string, balance: number) =>
       dp.set(state, `tokenBalances.${tokenid}`, v => v - balance),
   },
+  effects: dispatch => ({
+    async login({ data }: LoginArgs) {
+      this.SET_KEY(data.wif);
+      this.SET_PUBKEY(data.pubkey);
+      this.SET_ADDRESS(data.address);
+    },
+    logout() {
+      dispatch({ type: 'RESET_APP' });
+    },
+  }),
 });

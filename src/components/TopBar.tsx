@@ -53,7 +53,7 @@ const TopBar = () => {
             Feedback
           </ButtonSmall>
           <HSpaceSmall />
-          <ButtonSmall theme={Colors.TRANSPARENT} onClick={() => dispatch.account.logout()}>
+          <ButtonSmall theme={Colors.TRANSPARENT} onClick={() => dispatch.wallet.logout()}>
             Logout
           </ButtonSmall>
         </RightSideContainer>
